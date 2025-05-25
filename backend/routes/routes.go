@@ -2,7 +2,7 @@ package routes
 
 import (
     "github.com/gin-gonic/gin"
-    "github.com/MJUrian-Learner/AlgoPark-Backend/controllers"
+    "github.com/MJUrian-Learner/AlgoPark/backend/controllers"
 )
 
 func SetupRoutes(router *gin.Engine) {

@@ -1,4 +1,4 @@
-module github.com/MJUrian-Learner/AlgoPark-Backend
+module github.com/MJUrian-Learner/AlgoPark/backend
 
 go 1.24.3
 

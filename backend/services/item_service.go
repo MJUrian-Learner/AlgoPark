@@ -1,6 +1,6 @@
 package services
 
-import "github.com/MJUrian-Learner/AlgoPark-Backend/models"
+import "github.com/MJUrian-Learner/AlgoPark/backend/models"
 
 func GetAllItems() []models.Item {
     // Business logic to retrieve all items
