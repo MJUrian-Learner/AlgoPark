@@ -22,19 +22,19 @@ export const SIDEBAR_MENU_DATA: SidebarMenuData = {
         items: [
           {
             title: "Array",
-            url: "#",
+            url: "/visualize/data-structures/array",
           },
           {
             title: "Linked List",
-            url: "#",
+            url: "/visualize/data-structures/linked-list",
           },
           {
             title: "Stack",
-            url: "#",
+            url: "/visualize/data-structures/stack",
           },
           {
             title: "Queue",
-            url: "#",
+            url: "/visualize/data-structures/queue",
           },
         ],
       },
@@ -43,11 +43,11 @@ export const SIDEBAR_MENU_DATA: SidebarMenuData = {
         items: [
           {
             title: "Tree",
-            url: "#",
+            url: "/visualize/data-structures/tree",
           },
           {
             title: "Graph",
-            url: "#",
+            url: "/visualize/data-structures/graph",
           },
         ],
       },
