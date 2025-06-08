@@ -1,113 +1,121 @@
-# 🧠 AlgoPark: DSA Visualization Web Application
+# 🏞️ AlgoPark
 
-**AlgoPark** is an interactive and educational web app designed to help users visualize and understand Data Structures and Algorithms (DSA) through dynamic animations, intuitive flowcharts, and hands-on experimentation. Perfect for students, educators, and developers aiming to deepen their DSA comprehension.
+**AlgoPark** is a visual learning platform for Data Structures, Algorithms, and popular coding problems. It brings code to life through smooth, interactive animations—designed to make abstract concepts more intuitive and engaging.
 
----
+## 📑 Table of Contents
 
-## 🎯 Project Objectives
+- [MVP Features](#-mvp-features-v1.0)
+- [Project Structure](#-project-structure)
+- [Tech Stack](#-tech-stack)
+- [Features](#-features)
+- [Getting Started](#-getting-started)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Acknowledgements](#-acknowledgements)
 
-- **Interactive Learning:** Enable visual experimentation with DS and algorithms.
-- **Ease of Use:** Simple and intuitive UI for creating and manipulating structures.
-- **Educational Value:** Animations to clarify operations and algorithmic flows.
+## 📌 MVP Features (v1.0)
 
----
+### 🔹 Top 10 Data Structures
 
-## ✅ Core Features
+- Array
+- Linked List
+- Stack
+- Queue
+- Hash Table
+- Binary Tree
+- Binary Search Tree
+- Heap
+- Graph
+- Trie
 
-### 1. User Input Management
+### 🔹 Top 10 Algorithms
 
-- Input custom datasets for:
-  - **Graphs:** Nodes, edges, weights
-  - **Arrays:** Numeric sequences
-  - **Trees:** Hierarchical structures
+- Bubble Sort
+- Merge Sort
+- Quick Sort
+- Binary Search
+- Breadth-First Search (BFS)
+- Depth-First Search (DFS)
+- Dijkstra's Algorithm
+- A\* Pathfinding
+- Recursion
+- Sliding Window
 
-### 2. Data Structure Visualization
+### 🔹 Top 5 LeetCode Problems
 
-- Visual operations for:
-  - Arrays (insert, delete, traverse)
-  - Linked Lists (insert, delete, traverse)
-  - Stacks (push, pop, peek)
-  - Queues (enqueue, dequeue)
-  - Binary Trees/BSTs (insert, delete, traversal)
-  - Heaps (heapify, insert, delete)
-  - Hash Tables (basic and collision handling)
-  - Graphs (DFS, BFS, edge/node updates)
-  - Tries (insert, search)
+- Two Sum
+- Merge Two Sorted Lists
+- Valid Parentheses
+- Binary Search
+- Flood Fill
 
-### 3. Algorithm Visualization
+## 🧱 Project Structure
 
-- Step-by-step visualizations for:
-  - Bubble Sort, Merge Sort, Quick Sort
-  - Binary Search
-  - BFS / DFS
-  - Dijkstra’s Algorithm
-  - Prim’s & Kruskal’s MST
-  - Heap Sort
+```
+algopark/
+├── frontend/          # Next.js app with animations and UI
+│   ├── components/    # React components
+│   ├── pages/        # Next.js pages
+│   └── styles/       # CSS and styling
+└── backend/          # (Planned) API and services
+    ├── api/          # API endpoints
+    └── services/     # Business logic
+```
 
-### 4. Playback Controls
+## ⚙️ Tech Stack
 
-- Full playback control suite:
-  - Play / Pause / Resume
-  - Step forward/backward
-  - Speed adjustment slider
+- **Frontend:** Next.js, React, Tailwind CSS
+- **Animations:** Framer Motion, CSS `offset-path`
+- **Backend:** Node.js (for future expansion)
 
-### 5. Flowchart-Based Algorithm Builder
+## ✨ Features
 
-- Build custom algorithms via interactive canvas.
-- Converts flowchart logic to animated execution steps.
+- 🎞️ Animated step-by-step visualizations
+- 🧠 Intuitive breakdowns of algorithms and logic flow
+- 💡 LeetCode problem walkthroughs with real-time tracing
+- 📱 Responsive design (mobile & desktop)
 
-### 6. Import/Export Functionality
+## 🛠 Getting Started
 
-- Save & load states (DS and algorithm setup)
-- JSON file-based import/export
-
----
-
-## 👤 User Stories (Sample)
-
-- **Student:** Wants to input custom data to visualize specific cases.
-- **Educator:** Needs step-wise control to pause and explain.
-- **Developer:** Uses the flowchart builder to design and debug logic.
-
----
-
-## 🔑 MVP Scope
-
-### Must-Have Features:
-
-- Core DS visualizations
-- Top 10 algorithm visualizations
-- Playback controls
-- Custom dataset input
-- Flowchart builder
-- JSON import/export
-
-### Nice-to-Have (Future):
-
-- Account system & community sharing
-- Advanced trees (AVL, Red-Black)
-- Algorithm benchmarking tools
-- Responsive UI for mobile
-
----
-
-## 🛠 Tech Stack
-
-| Layer                 | Stack                                                    |
-| --------------------- | -------------------------------------------------------- |
-| **Frontend**          | Vite + React + Tailwind CSS + React Flow + Framer Motion |
-| **State Mgmt**        | Zustand (or Redux if needed)                             |
-| **Backend**           | Go + Gin                                                 |
-| **(Optional Future)** | Node.js + Express + PostgreSQL (for auth, storage)       |
-
----
-
-## 🚀 Development Setup
-
-### Frontend
+### 🔧 Run Frontend
 
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
+Access the app at http://localhost:3000
+
+### ⚙️ Backend (Coming Soon)
+
+```bash
+cd backend
+# Backend setup instructions to follow in future versions
+```
+
+## 🗺 Roadmap
+
+- [ ] User-controlled animation speed and steps
+- [ ] Custom input mode for algorithms
+- [ ] In-browser code editor integration
+- [ ] User accounts and save progress
+- [ ] Mobile-first UI polish and PWA support
+
+## 🤝 Contributing
+
+We welcome all contributors! Whether it's new visualizations, UI enhancements, or backend features, feel free to open issues and submit PRs.
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🙌 Acknowledgements
+
+- Inspired by VisuAlgo and CS50's visual teaching approach
+- Built with ❤️ using open-source tools and a passion for learning
+
+---
+
+Let me know if you want a logo banner, deployment section (e.g. Vercel setup), or automated badges (license, build, etc.) included.
