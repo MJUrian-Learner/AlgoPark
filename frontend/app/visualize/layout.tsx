@@ -1,5 +1,3 @@
-"use client";
-
 import { AppSidebar } from "@/components/app-sidebar";
 import DynamicBreadcrumb from "@/components/dynamic-breadcrumb";
 
@@ -10,13 +8,18 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-export default function VisualizeLayout({
+import { cookies } from "next/headers";
+
+export default async function VisualizeLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
