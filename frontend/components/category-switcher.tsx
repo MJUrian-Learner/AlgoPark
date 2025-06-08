@@ -1,28 +1,32 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Check, ChevronsUpDown, GalleryVerticalEnd } from "lucide-react"
+import * as React from "react";
+import { Check, ChevronsUpDown, Layers } from "lucide-react";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-export function VersionSwitcher({
-  versions,
-  defaultVersion,
-}: {
-  versions: string[]
-  defaultVersion: string
-}) {
-  const [selectedVersion, setSelectedVersion] = React.useState(defaultVersion)
+interface CategorySwitcherProps {
+  categories: string[];
+  selectedCategory: string;
+  setSelectedCategory: (category: string) => void;
+}
+
+export function CategorySwitcher({
+  categories,
+  selectedCategory,
+  setSelectedCategory
+}: CategorySwitcherProps) {
+
 
   return (
     <SidebarMenu>
@@ -34,11 +38,11 @@ export function VersionSwitcher({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <GalleryVerticalEnd className="size-4" />
+                <Layers className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-medium">Documentation</span>
-                <span className="">v{selectedVersion}</span>
+                <span className="font-medium">Category</span>
+                <span className="">{selectedCategory}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -47,18 +51,18 @@ export function VersionSwitcher({
             className="w-(--radix-dropdown-menu-trigger-width)"
             align="start"
           >
-            {versions.map((version) => (
+            {categories.map((category) => (
               <DropdownMenuItem
-                key={version}
-                onSelect={() => setSelectedVersion(version)}
+                key={category}
+                onSelect={() => setSelectedCategory(category)}
               >
-                v{version}{" "}
-                {version === selectedVersion && <Check className="ml-auto" />}
+                {category}{" "}
+                {category === selectedCategory && <Check className="ml-auto" />}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }
