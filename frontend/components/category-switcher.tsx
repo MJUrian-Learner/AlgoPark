@@ -24,10 +24,8 @@ interface CategorySwitcherProps {
 export function CategorySwitcher({
   categories,
   selectedCategory,
-  setSelectedCategory
+  setSelectedCategory,
 }: CategorySwitcherProps) {
-
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -41,8 +39,10 @@ export function CategorySwitcher({
                 <Layers className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-medium">Category</span>
-                <span className="">{selectedCategory}</span>
+                <span className="font-light text-primary">Category</span>
+                <span className="font-medium tracking-wide">
+                  {selectedCategory}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
