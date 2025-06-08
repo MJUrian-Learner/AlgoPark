@@ -10,7 +10,7 @@ const Box = ({ children, className }: BoxProps) => {
   return (
     <div
       className={cn(
-        "bg-muted/50 rounded-md flex items-center justify-center border border-border",
+        "bg-accent rounded-md flex items-center justify-center border border-border",
         className
       )}
     >
