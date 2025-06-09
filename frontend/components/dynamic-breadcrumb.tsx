@@ -16,15 +16,15 @@ const DynamicBreadcrumb = () => {
   const pathname = usePathname();
   const segments = pathname.split("/");
 
-  console.log(segments);
-
   return (
     <Breadcrumb>
       <BreadcrumbList>
         {segments.map((segment, index) => {
           const isFirst = index === 0;
           const isLast = index === segments.length - 1;
-          const href = isFirst ? "/" : `/${segments.slice(1, index + 1).join("/")}`;
+          const href = isFirst
+            ? "/"
+            : `/${segments.slice(1, index + 1).join("/")}`;
           const label = isFirst ? "Home" : capitalize(segment);
 
           return (
@@ -36,9 +36,7 @@ const DynamicBreadcrumb = () => {
                   <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
                 )}
               </BreadcrumbItem>
-              {!isLast && (
-                <BreadcrumbSeparator className="hidden md:block" />
-              )}
+              {!isLast && <BreadcrumbSeparator className="hidden md:block" />}
             </React.Fragment>
           );
         })}
