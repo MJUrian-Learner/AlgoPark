@@ -12,7 +12,7 @@ const Box = ({ children, className, style, ...props }: BoxProps) => {
   return (
     <motion.div
       className={cn(
-        "bg-accent rounded-md flex items-center justify-center border border-border",
+        "p-4 rounded-lg flex items-center justify-center",
         className
       )}
       style={style}
