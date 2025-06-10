@@ -1,11 +1,12 @@
 import {
   ARRAY_ITEM_SIZE,
+  LEFT_POINT,
   ORIGIN_POINT,
   RIGHT_POINT,
 } from "@/app/constants/array";
 import { motion, useAnimationControls, Variants } from "framer-motion";
 import _ from "lodash";
-import { memo, useEffect, useLayoutEffect } from "react";
+import { memo, useEffect } from "react";
 
 const ARRAY_ITEM_VARIANTS: Variants = {
   nonexistent: {
@@ -35,6 +36,24 @@ const ARRAY_ITEM_VARIANTS: Variants = {
       damping: 20,
     },
   },
+  shifting: {
+    offsetPath: LEFT_POINT,
+    offsetDistance: "100%",
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 20,
+    },
+  },
+  unshifting: {
+    offsetPath: ORIGIN_POINT,
+    offsetDistance: "100%",
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 20,
+    },
+  },
   swapping: {
     backgroundColor: "#fcd34d",
     scale: 1.1,
@@ -51,46 +70,51 @@ const ARRAY_ITEM_VARIANTS: Variants = {
 };
 
 export interface ArrayItemProps {
+  id: string;
   index: number;
   value: number;
   isPushing: boolean;
   isPopping: boolean;
   isBeingPopped: boolean;
+  isShifting: boolean;
+  isBeingShifted: boolean;
+  isUnshifting: boolean;
   isSwapping: boolean;
   isHighlighted: boolean;
   isSorted: boolean;
   pathData?: string;
   onPush?: () => void;
   onPop?: () => void;
-  onPopFinish?: () => void;
+  onShift?: () => void;
+  onUnshift?: () => void;
 }
 
 export default memo(function ArrayItem({
   isPushing,
   isPopping,
   isBeingPopped,
+  isShifting,
+  isBeingShifted,
+  isUnshifting,
   isSwapping,
   isHighlighted,
   isSorted,
   pathData,
   onPush,
   onPop,
-  onPopFinish,
+  onShift,
+  onUnshift,
   ...item
 }: ArrayItemProps) {
   const controls = useAnimationControls();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (isPushing) {
       controls.set({
         offsetPath: RIGHT_POINT,
         offsetDistance: "0%",
       });
       controls.start("pushing").then(() => {
-        controls.set({
-          offsetPath: ORIGIN_POINT,
-          offsetDistance: "0%",
-        });
         onPush?.();
       });
     } else if (isPopping) {
@@ -98,13 +122,33 @@ export default memo(function ArrayItem({
         offsetPath: ORIGIN_POINT,
         offsetDistance: "0%",
       });
-      controls.start("popping").then(() => {});
+      controls.start("popping");
 
       if (isBeingPopped) {
         controls.start("nonexistent").then(() => {
           onPop?.();
         });
       }
+    } else if (isShifting) {
+      controls.set({
+        offsetPath: ORIGIN_POINT,
+        offsetDistance: "0%",
+      });
+      controls.start("shifting");
+
+      if (isBeingShifted) {
+        controls.start("nonexistent").then(() => {
+          onShift?.();
+        });
+      }
+    } else if (isUnshifting) {
+      controls.set({
+        offsetPath: LEFT_POINT,
+        offsetDistance: "0%",
+      });
+      controls.start("unshifting").then(() => {
+        onUnshift?.();
+      });
     } else if (isSwapping && pathData) {
       controls.start({
         ...ARRAY_ITEM_VARIANTS.swapping,
@@ -122,15 +166,28 @@ export default memo(function ArrayItem({
     isPushing,
     isPopping,
     isBeingPopped,
+    isShifting,
+    isBeingShifted,
+    isUnshifting,
     isSwapping,
     isHighlighted,
     isSorted,
     pathData,
     onPush,
     onPop,
-    onPopFinish,
+    onShift,
+    onUnshift,
     controls,
   ]);
+
+  useEffect(() => {
+    if (!isPushing) {
+      controls.set({
+        offsetPath: ORIGIN_POINT,
+        offsetDistance: "0%",
+      });
+    }
+  }, [controls, isPushing]);
 
   useEffect(() => {
     if (!isPopping) {
@@ -140,6 +197,24 @@ export default memo(function ArrayItem({
       });
     }
   }, [controls, isPopping]);
+
+  useEffect(() => {
+    if (!isShifting) {
+      controls.set({
+        offsetPath: ORIGIN_POINT,
+        offsetDistance: "0%",
+      });
+    }
+  }, [controls, isShifting]);
+
+  useEffect(() => {
+    if (!isUnshifting) {
+      controls.set({
+        offsetPath: ORIGIN_POINT,
+        offsetDistance: "0%",
+      });
+    }
+  }, [controls, isUnshifting]);
 
   return (
     <motion.div

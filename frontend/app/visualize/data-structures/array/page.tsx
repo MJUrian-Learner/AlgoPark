@@ -10,8 +10,8 @@ export default function ArrayComponent() {
     isAnimating,
     pushWithAnimation,
     popWithAnimation,
-    shift,
-    unshift,
+    shiftWithAnimation,
+    unshiftWithAnimation,
   } = useArray();
 
   return (
@@ -30,10 +30,13 @@ export default function ArrayComponent() {
         >
           Pop
         </Button>
-        <Button onClick={shift} disabled={itemCount === 0 || isAnimating}>
+        <Button
+          onClick={() => shiftWithAnimation()}
+          disabled={itemCount === 0 || isAnimating}
+        >
           Shift
         </Button>
-        <Button onClick={unshift} disabled={isAnimating}>
+        <Button onClick={() => unshiftWithAnimation(1)} disabled={isAnimating}>
           Unshift
         </Button>
       </div>
