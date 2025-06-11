@@ -1,43 +1,56 @@
 "use client";
 
-import usePrevious from "@/hooks/use-previous";
 import _ from "lodash";
+import { nanoid } from "nanoid";
 import {
   createContext,
   PropsWithChildren,
+  RefObject,
   useCallback,
   useContext,
-  useLayoutEffect,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { nanoid } from "nanoid";
 import { ArrayItem } from "./Array";
+import {
+  ARRAY_ITEM_GAP,
+  ARRAY_ITEM_SIZE,
+  HALF_ARRAY_ITEM_SIZE,
+} from "@/app/constants/array";
 
 interface ArrayContextValue {
   items: ArrayItem[];
+  itemRefs: RefObject<{
+    container: HTMLDivElement | null;
+    [key: string]: HTMLDivElement | null;
+  }>;
   itemCount: number;
   isPushing: boolean;
   isPopping: boolean;
   isShifting: boolean;
   isUnshifting: boolean;
   isAnimating: boolean;
-  push: (value: number, cb?: (items: ArrayItem[]) => void) => void;
-  pushWithAnimation: (value: number, cb?: (items: ArrayItem[]) => void) => void;
+  push: (value: number) => Promise<ArrayItem[]>;
+  pushWithAnimation: (value: number) => Promise<ArrayItem[]>;
   handlePushAnimationEnd: () => void;
-  pop: (cb?: () => void) => void;
-  popWithAnimation: (cb?: () => void) => void;
+  pop: () => Promise<ArrayItem | undefined>;
+  popWithAnimation: () => Promise<ArrayItem | undefined>;
   handlePopAnimationEnd: () => void;
-  shift: (cb?: () => void) => void;
-  shiftWithAnimation: (cb?: () => void) => void;
+  shift: () => Promise<ArrayItem | undefined>;
+  shiftWithAnimation: () => Promise<ArrayItem | undefined>;
   handleShiftAnimationEnd: () => void;
-  unshift: (value: number, cb?: (items: ArrayItem[]) => void) => void;
-  unshiftWithAnimation: (
-    value: number,
-    cb?: (items: ArrayItem[]) => void
-  ) => void;
+  unshift: (value: number) => Promise<ArrayItem[]>;
+  unshiftWithAnimation: (value: number) => Promise<ArrayItem[]>;
   handleUnshiftAnimationEnd: () => void;
+  swap: (firstIndex: number, secondIndex: number) => Promise<ArrayItem[]>;
+  swapWithAnimation: (
+    firstIndex: number,
+    secondIndex: number
+  ) => Promise<ArrayItem[]>;
+  handleSwapAnimationEnd: () => void;
+  bubbleSort: () => void;
 }
 
 interface ArrayContextProps extends PropsWithChildren {
@@ -46,24 +59,53 @@ interface ArrayContextProps extends PropsWithChildren {
 
 const Context = createContext<ArrayContextValue>({
   items: [],
+  itemRefs: { current: { container: null } },
   itemCount: 0,
   isPushing: false,
   isPopping: false,
   isShifting: false,
   isUnshifting: false,
   isAnimating: false,
-  push: () => {},
-  pushWithAnimation: () => {},
+  push: async () => [],
+  pushWithAnimation: async () => [],
   handlePushAnimationEnd: () => {},
-  pop: () => {},
-  popWithAnimation: () => {},
+  pop: async () => ({
+    id: "",
+    value: 0,
+    isSwapping: false,
+    isHighlighted: false,
+    isSorted: false,
+  }),
+  popWithAnimation: async () => ({
+    id: "",
+    value: 0,
+    isSwapping: false,
+    isHighlighted: false,
+    isSorted: false,
+  }),
   handlePopAnimationEnd: () => {},
-  shift: () => {},
-  shiftWithAnimation: () => {},
+  shift: async () => ({
+    id: "",
+    value: 0,
+    isSwapping: false,
+    isHighlighted: false,
+    isSorted: false,
+  }),
+  shiftWithAnimation: async () => ({
+    id: "",
+    value: 0,
+    isSwapping: false,
+    isHighlighted: false,
+    isSorted: false,
+  }),
   handleShiftAnimationEnd: () => {},
-  unshift: () => {},
-  unshiftWithAnimation: () => {},
+  unshift: async () => [],
+  unshiftWithAnimation: async () => [],
   handleUnshiftAnimationEnd: () => {},
+  swap: async () => [],
+  swapWithAnimation: async () => [],
+  handleSwapAnimationEnd: () => {},
+  bubbleSort: () => {},
 });
 
 export const useArray = () => useContext(Context);
@@ -73,9 +115,8 @@ export default function ArrayContext({
   children,
 }: ArrayContextProps) {
   const [items, setItems] = useState(() =>
-    initialItems.map<ArrayItem>((item, idx) => ({
+    initialItems.map<ArrayItem>((item) => ({
       id: nanoid(),
-      index: idx,
       value: item,
       isSwapping: false,
       isHighlighted: false,
@@ -83,8 +124,11 @@ export default function ArrayContext({
     }))
   );
 
+  const itemRefs = useRef<ArrayContextValue["itemRefs"]["current"]>({
+    container: null,
+  });
+
   const itemCount = useMemo(() => items.length, [items.length]);
-  const previousItemCount = usePrevious(itemCount, 0);
 
   const [isPushing, setIsPushing] = useState(false);
   const [isPopping, setIsPopping] = useState(false);
@@ -92,41 +136,54 @@ export default function ArrayContext({
   const [isUnshifting, setIsUnshifting] = useState(false);
 
   const isAnimating = useMemo(
-    () => isPushing || isPopping || isShifting || isUnshifting,
-    [isPushing, isPopping, isShifting, isUnshifting]
+    () =>
+      isPushing ||
+      isPopping ||
+      isShifting ||
+      isUnshifting ||
+      items.some((item) => item.isSwapping),
+    [isPushing, isPopping, isShifting, isUnshifting, items]
   );
 
-  const pushCbRef = useRef<((items: ArrayItem[]) => void) | undefined>(
-    undefined
-  );
-  const popCbRef = useRef<(() => void) | undefined>(undefined);
-  const shiftCbRef = useRef<(() => void) | undefined>(undefined);
-  const unshiftCbRef = useRef<((items: ArrayItem[]) => void) | undefined>(
-    undefined
-  );
+  const resolvePopWithAnimationRef =
+    useRef<
+      (
+        value: ArrayItem | PromiseLike<ArrayItem | undefined> | undefined
+      ) => void
+    >(undefined);
+  const resolveShiftWithAnimationRef =
+    useRef<
+      (
+        value: ArrayItem | PromiseLike<ArrayItem | undefined> | undefined
+      ) => void
+    >(undefined);
+  const resolveSwapWithAnimatonRef = useRef<{
+    arguments: Parameters<ArrayContextValue["swap"]>;
+    fn: (value: ArrayItem[] | PromiseLike<ArrayItem[]>) => void;
+  }>(undefined);
 
-  const push = useCallback<ArrayContextValue["push"]>((value, cb) => {
-    pushCbRef.current = cb;
-    setItems((items) => {
-      const newItems = _.cloneDeep(items);
-      newItems.push({
-        id: nanoid(),
-        index: items.length,
-        value,
-        isSwapping: false,
-        isHighlighted: false,
-        isSorted: false,
+  const push = useCallback<ArrayContextValue["push"]>((value) => {
+    return new Promise((resolve) => {
+      setItems((items) => {
+        const newItems = _.cloneDeep(items);
+        newItems.push({
+          id: nanoid(),
+          value,
+          isSwapping: false,
+          isHighlighted: false,
+          isSorted: false,
+        });
+        resolve(newItems);
+        return newItems;
       });
-      return newItems;
     });
   }, []);
 
   const pushWithAnimation = useCallback<ArrayContextValue["pushWithAnimation"]>(
-    (value, cb) => {
-      push(value, (items) => {
-        cb?.(items);
-        setIsPushing(true);
-      });
+    async (value) => {
+      const items = await push(value);
+      setIsPushing(true);
+      return items;
     },
     [push]
   );
@@ -137,77 +194,86 @@ export default function ArrayContext({
     setIsPushing(false);
   }, []);
 
-  const pop = useCallback<ArrayContextValue["pop"]>((cb) => {
-    popCbRef.current = cb;
-    setItems((items) => {
-      const newItems = _.cloneDeep(items);
-      newItems.pop();
-      return newItems;
+  const pop = useCallback<ArrayContextValue["pop"]>(() => {
+    return new Promise((resolve) => {
+      setItems((items) => {
+        const newItems = _.cloneDeep(items);
+        resolve(newItems.pop());
+        return newItems;
+      });
     });
   }, []);
 
-  const popWithAnimation = useCallback<ArrayContextValue["popWithAnimation"]>(
-    (cb) => {
-      popCbRef.current = cb;
-      setIsPopping(true);
-    },
-    []
-  );
+  const popWithAnimation = useCallback<
+    ArrayContextValue["popWithAnimation"]
+  >(() => {
+    setIsPopping(true);
+    return new Promise((resolve) => {
+      resolvePopWithAnimationRef.current = resolve;
+    });
+  }, []);
 
   const handlePopAnimationEnd = useCallback<
     ArrayContextValue["handlePopAnimationEnd"]
-  >(() => {
-    pop(popCbRef.current);
+  >(async () => {
     setIsPopping(false);
+
+    const poppedItem = await pop();
+    resolvePopWithAnimationRef.current?.(poppedItem);
   }, [pop]);
 
-  const shift = useCallback<ArrayContextValue["shift"]>((cb) => {
-    shiftCbRef.current = cb;
-    setItems((items) => {
-      const newItems = _.cloneDeep(items);
-      newItems.shift();
-      return newItems;
+  const shift = useCallback<ArrayContextValue["shift"]>(() => {
+    return new Promise((resolve) => {
+      setItems((items) => {
+        const newItems = _.cloneDeep(items);
+        resolve(newItems.shift());
+        return newItems;
+      });
     });
   }, []);
 
   const shiftWithAnimation = useCallback<
     ArrayContextValue["shiftWithAnimation"]
-  >((cb) => {
-    shiftCbRef.current = cb;
+  >(() => {
     setIsShifting(true);
+    return new Promise((resolve) => {
+      resolveShiftWithAnimationRef.current = resolve;
+    });
   }, []);
 
   const handleShiftAnimationEnd = useCallback<
     ArrayContextValue["handleShiftAnimationEnd"]
-  >(() => {
-    shift(shiftCbRef.current);
+  >(async () => {
     setIsShifting(false);
+
+    const shiftedItem = await shift();
+    resolveShiftWithAnimationRef.current?.(shiftedItem);
   }, [shift]);
 
-  const unshift = useCallback<ArrayContextValue["unshift"]>((value, cb) => {
-    unshiftCbRef.current = cb;
-    setItems((items) => {
-      const newItems = _.cloneDeep(items);
-      newItems.unshift({
-        id: nanoid(),
-        index: items.length,
-        value,
-        isSwapping: false,
-        isHighlighted: false,
-        isSorted: false,
+  const unshift = useCallback<ArrayContextValue["unshift"]>((value) => {
+    return new Promise((resolve) => {
+      setItems((items) => {
+        const newItems = _.cloneDeep(items);
+        newItems.unshift({
+          id: nanoid(),
+          value,
+          isSwapping: false,
+          isHighlighted: false,
+          isSorted: false,
+        });
+        resolve(newItems);
+        return newItems;
       });
-      return newItems;
     });
   }, []);
 
   const unshiftWithAnimation = useCallback<
     ArrayContextValue["unshiftWithAnimation"]
   >(
-    (value, cb) => {
-      unshift(value, (items) => {
-        cb?.(items);
-        setIsUnshifting(true);
-      });
+    async (value) => {
+      const items = await unshift(value);
+      setIsUnshifting(true);
+      return items;
     },
     [unshift]
   );
@@ -218,42 +284,110 @@ export default function ArrayContext({
     setIsUnshifting(false);
   }, []);
 
-  useLayoutEffect(() => {
-    if (itemCount === previousItemCount) return;
+  const swap = useCallback<ArrayContextValue["swap"]>(
+    (firstIndex, secondIndex) => {
+      return new Promise((resolve) => {
+        setItems((items) => {
+          const newItems = _.cloneDeep(items);
 
-    if (itemCount > previousItemCount) {
-      // pushCbRef and unshiftCbRef might be both present
-      // if push and unshift is somehow used simultaenously
-      // this might cause bugs in the future
+          newItems[firstIndex] = items[secondIndex];
+          newItems[firstIndex].isSwapping = false;
+          newItems[firstIndex].swapPathData = undefined;
 
-      if (pushCbRef.current !== undefined) {
-        pushCbRef.current(items);
-        pushCbRef.current = undefined;
-      }
+          newItems[secondIndex] = items[firstIndex];
+          newItems[secondIndex].isSwapping = false;
+          newItems[secondIndex].swapPathData = undefined;
 
-      if (unshiftCbRef.current !== undefined) {
-        unshiftCbRef.current(items);
-        unshiftCbRef.current = undefined;
-      }
+          resolve(newItems);
+          return newItems;
+        });
+      });
+    },
+    []
+  );
 
-      return;
-    }
+  const swapWithAnimation = useCallback<ArrayContextValue["swapWithAnimation"]>(
+    (firstIndex, secondIndex) => {
+      const o = HALF_ARRAY_ITEM_SIZE;
+      const d = Math.abs(firstIndex - secondIndex);
 
-    if (popCbRef.current !== undefined) {
-      popCbRef.current();
-      popCbRef.current = undefined;
-    }
+      const yOffset = d === 1 ? HALF_ARRAY_ITEM_SIZE : ARRAY_ITEM_SIZE;
+      const x1 =
+        (secondIndex - firstIndex) * (ARRAY_ITEM_SIZE + ARRAY_ITEM_GAP) + o;
+      const x2 =
+        (firstIndex - secondIndex) * (ARRAY_ITEM_SIZE + ARRAY_ITEM_GAP) + o;
 
-    if (shiftCbRef.current !== undefined) {
-      shiftCbRef.current();
-      shiftCbRef.current = undefined;
-    }
-  }, [items, itemCount, previousItemCount]);
+      const path1 = `M ${o} ${o} L ${o} ${
+        o - yOffset - ARRAY_ITEM_GAP
+      } L ${x1} ${o - yOffset - ARRAY_ITEM_GAP} L ${x1} ${o}`;
+
+      const path2 = `M ${o} ${o} L ${o} ${
+        o + yOffset + ARRAY_ITEM_GAP
+      } L ${x2} ${o + yOffset + ARRAY_ITEM_GAP} L ${x2} ${o}`;
+
+      return new Promise((resolve) => {
+        resolveSwapWithAnimatonRef.current = {
+          arguments: [firstIndex, secondIndex],
+          fn: resolve,
+        };
+
+        setItems((items) => {
+          const newItems = _.cloneDeep(items);
+
+          newItems[firstIndex].isSwapping = true;
+          newItems[firstIndex].swapPathData = path1;
+
+          newItems[secondIndex].isSwapping = true;
+          newItems[secondIndex].swapPathData = path2;
+
+          return newItems;
+        });
+      });
+    },
+    []
+  );
+
+  const handleSwapAnimationEnd = useCallback<
+    ArrayContextValue["handleSwapAnimationEnd"]
+  >(() => {
+    const resolve = resolveSwapWithAnimatonRef.current;
+    if (resolve === undefined) return;
+
+    resolveSwapWithAnimatonRef.current = undefined;
+
+    const firstIndex = resolve.arguments[0];
+    const secondIndex = resolve.arguments[1];
+
+    swap(firstIndex, secondIndex).then((items) => {
+      resolve.fn(items);
+    });
+  }, [swap]);
+
+  const bubbleSort = useCallback<ArrayContextValue["bubbleSort"]>(() => {
+    // TODO: Implement bubble sort
+  }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      swapWithAnimation(1, 2).then(() => {
+        swapWithAnimation(2, 3).then(() => {
+          swapWithAnimation(3, 4).then(() => {
+            swapWithAnimation(4, 5).then(() => {
+              swapWithAnimation(5, 6).then(() => {
+                swapWithAnimation(0, 6).then(() => {});
+              });
+            });
+          });
+        });
+      });
+    }, 1000);
+  }, [swapWithAnimation]);
 
   return (
     <Context
       value={{
         items,
+        itemRefs,
         itemCount,
         isPushing,
         isPopping,
@@ -272,6 +406,10 @@ export default function ArrayContext({
         unshift,
         unshiftWithAnimation,
         handleUnshiftAnimationEnd,
+        swap,
+        swapWithAnimation,
+        handleSwapAnimationEnd,
+        bubbleSort,
       }}
     >
       {children}

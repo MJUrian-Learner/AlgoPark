@@ -6,6 +6,7 @@ import ArrayItem, { ArrayItemProps } from "./ArrayItem";
 
 export type ArrayItem = Omit<
   ArrayItemProps,
+  | "index"
   | "isPushing"
   | "isPopping"
   | "isBeingPopped"
@@ -21,6 +22,7 @@ export type ArrayItem = Omit<
 export default function Array() {
   const {
     items,
+    itemRefs,
     isPushing,
     isPopping,
     isShifting,
@@ -29,10 +31,16 @@ export default function Array() {
     handlePopAnimationEnd,
     handleShiftAnimationEnd,
     handleUnshiftAnimationEnd,
+    handleSwapAnimationEnd,
   } = useArray();
 
   return (
-    <div style={{ display: "flex", gap: ARRAY_ITEM_GAP }}>
+    <div
+      ref={(element) => {
+        itemRefs.current.container = element;
+      }}
+      style={{ display: "flex", gap: ARRAY_ITEM_GAP }}
+    >
       {items.map((item, idx) => {
         const isFirstItem = idx == 0;
         const isLastItem = idx === items.length - 1;
@@ -50,7 +58,11 @@ export default function Array() {
         return (
           <ArrayItem
             key={item.id}
+            ref={(element) => {
+              itemRefs.current[item.id] = element;
+            }}
             {...item}
+            index={idx}
             isPushing={isPushing}
             isPopping={isPopping}
             isBeingPopped={isPopping && isLastItem}
@@ -61,6 +73,7 @@ export default function Array() {
             onPop={onPop}
             onShift={onShift}
             onUnshift={onUnshift}
+            onSwap={handleSwapAnimationEnd}
           />
         );
       })}

@@ -61,7 +61,7 @@ const ARRAY_ITEM_VARIANTS: Variants = {
       offsetDistance: {
         type: "tween",
         duration: 0.8,
-        ease: "easeInOut",
+        ease: [0.8, 0.4, 0.3, 1],
       },
     },
   },
@@ -82,11 +82,13 @@ export interface ArrayItemProps {
   isSwapping: boolean;
   isHighlighted: boolean;
   isSorted: boolean;
-  pathData?: string;
+  swapPathData?: string;
   onPush?: () => void;
   onPop?: () => void;
   onShift?: () => void;
   onUnshift?: () => void;
+  onSwap?: () => void;
+  ref?: React.Ref<HTMLDivElement>;
 }
 
 export default memo(function ArrayItem({
@@ -99,11 +101,13 @@ export default memo(function ArrayItem({
   isSwapping,
   isHighlighted,
   isSorted,
-  pathData,
+  swapPathData,
   onPush,
   onPop,
   onShift,
   onUnshift,
+  onSwap,
+  ref,
   ...item
 }: ArrayItemProps) {
   const controls = useAnimationControls();
@@ -149,12 +153,16 @@ export default memo(function ArrayItem({
       controls.start("unshifting").then(() => {
         onUnshift?.();
       });
-    } else if (isSwapping && pathData) {
-      controls.start({
-        ...ARRAY_ITEM_VARIANTS.swapping,
-        offsetPath: `path("${pathData}")`,
-        offsetDistance: "100%",
-      });
+    } else if (isSwapping && swapPathData) {
+      controls
+        .start({
+          ...ARRAY_ITEM_VARIANTS.swapping,
+          offsetPath: `path("${swapPathData}")`,
+          offsetDistance: "100%",
+        })
+        .then(() => {
+          onSwap?.();
+        });
     } else if (isHighlighted) {
       controls.start("highlight");
     } else if (isSorted) {
@@ -172,11 +180,12 @@ export default memo(function ArrayItem({
     isSwapping,
     isHighlighted,
     isSorted,
-    pathData,
+    swapPathData,
     onPush,
     onPop,
     onShift,
     onUnshift,
+    onSwap,
     controls,
   ]);
 
@@ -216,8 +225,18 @@ export default memo(function ArrayItem({
     }
   }, [controls, isUnshifting]);
 
+  useEffect(() => {
+    if (!isSwapping) {
+      controls.set({
+        offsetPath: ORIGIN_POINT,
+        offsetDistance: "0%",
+      });
+    }
+  }, [controls, isSwapping]);
+
   return (
     <motion.div
+      ref={ref}
       style={{
         width: ARRAY_ITEM_SIZE,
         height: ARRAY_ITEM_SIZE,
