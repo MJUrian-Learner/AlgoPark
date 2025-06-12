@@ -72,6 +72,7 @@ export default function ArrayComponent() {
                 // Setting it to false here works well for push/unshift
                 setIsAnimating(false);
               }}
+              whileHover={{ scale: 1.15 }}
             >
               {item.value}
             </Box>
