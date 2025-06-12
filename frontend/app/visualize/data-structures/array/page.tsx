@@ -130,8 +130,16 @@ export default function ArrayComponent() {
               y = item.id === swapping[0] ? -30 : 30;
             }
             return (
-              <motion.div
+              <Box
                 key={item.id}
+                className={`border border-border shadow-sm transition-colors duration-300 ${
+                  item.isComparing
+                    ? "bg-blue-500!"
+                    : item.isSorted
+                    ? "bg-green-500!"
+                    : "bg-accent"
+                }`}
+                whileHover={{ scale: 1.15 }}
                 layout
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1, y }}
@@ -141,20 +149,10 @@ export default function ArrayComponent() {
                   damping: 20,
                   mass: 1,
                 }}
+                onAnimationComplete={() => setIsAnimating(false)}
               >
-                <Box
-                  className={`border border-border shadow-sm transition-colors duration-300 ${
-                    item.isComparing
-                      ? "bg-blue-500!"
-                      : item.isSorted
-                      ? "bg-green-500!"
-                      : "bg-accent"
-                  }`}
-                  whileHover={{ scale: 1.15 }}
-                >
-                  {item.value}
-                </Box>
-              </motion.div>
+                {item.value}
+              </Box>
             );
           })}
         </AnimatePresence>
