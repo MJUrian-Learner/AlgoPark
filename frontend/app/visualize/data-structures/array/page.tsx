@@ -52,7 +52,7 @@ export default function ArrayComponent() {
       <div>
         <h1 className="text-2xl font-bold">Array</h1>
       </div>
-      <div className="flex flex-row flex-wrap items-center justify-center gap-2 w-full overflow-hidden">
+      <div className="flex flex-row flex-wrap items-center justify-center gap-2 w-full overflow-hidden p-2">
         {/*
           4. Use onExitComplete on AnimatePresence. This is a more robust way
              to know when all "exit" animations are done.
@@ -62,7 +62,7 @@ export default function ArrayComponent() {
             <Box
               // 3. Use the stable and unique `item.id` as the key
               key={item.id}
-              className="bg-accent border border-border"
+              className="bg-accent border border-border shadow-sm"
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0 }}
