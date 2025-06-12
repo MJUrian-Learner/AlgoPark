@@ -63,9 +63,9 @@ export default function ArrayComponent() {
               // 3. Use the stable and unique `item.id` as the key
               key={item.id}
               className="bg-accent border border-border"
-              initial={{ opacity: 0, y: 100 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 100 }}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
               // onAnimationComplete for enter animations
               onAnimationComplete={() => {
                 // This will fire for every box on load and for new boxes entering
