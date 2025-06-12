@@ -52,7 +52,7 @@ export default function ArrayComponent() {
       <div>
         <h1 className="text-2xl font-bold">Array</h1>
       </div>
-      <div className="flex flex-row flex-wrap items-center justify-center gap-2 w-full overflow-hidden min-h-[80px]">
+      <div className="flex flex-row flex-wrap items-center justify-center gap-2 w-full overflow-hidden">
         {/*
           4. Use onExitComplete on AnimatePresence. This is a more robust way
              to know when all "exit" animations are done.
