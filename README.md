@@ -102,7 +102,3 @@ This project is licensed under the MIT License.
 
 * Inspired by VisuAlgo and CS50's visual teaching approach
 * Built with ❤️ using open-source tools and a passion for learning
-
----
-
-Let me know if you want a logo banner, deployment section (e.g. Vercel setup), or automated badges (license, build, etc.) included.
