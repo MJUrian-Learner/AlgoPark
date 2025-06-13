@@ -1,6 +1,6 @@
 import makePoint from "@/utils/makePoint";
 
-export const ARRAY_ITEM_SIZE = 75;
+export const ARRAY_ITEM_SIZE = 60;
 export const ARRAY_ITEM_GAP = 12;
 
 export const HALF_ARRAY_ITEM_SIZE = ARRAY_ITEM_SIZE / 2;

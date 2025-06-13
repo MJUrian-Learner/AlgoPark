@@ -7,12 +7,12 @@ import ArrayItem, { ArrayItemProps } from "./ArrayItem";
 export type ArrayItem = Omit<
   ArrayItemProps,
   | "index"
-  | "isPushing"
-  | "isPopping"
+  | "isArrayPushing"
+  | "isArrayPopping"
   | "isBeingPopped"
-  | "isShifting"
+  | "isArrayShifting"
   | "isBeingShifted"
-  | "isUnshifting"
+  | "isArrayUnshifting"
   | "onPush"
   | "onPop"
   | "onShift"
@@ -22,7 +22,6 @@ export type ArrayItem = Omit<
 export default function Array() {
   const {
     items,
-    itemRefs,
     isPushing,
     isPopping,
     isShifting,
@@ -31,16 +30,14 @@ export default function Array() {
     handlePopAnimationEnd,
     handleShiftAnimationEnd,
     handleUnshiftAnimationEnd,
-    handleSwapAnimationEnd,
+    handleSwapAnimationPreEnd,
+    handleSwapAnimationPostEnd,
+    handleCompareAnimationPreEnd,
+    handleCompareAnimationPostEnd,
   } = useArray();
 
   return (
-    <div
-      ref={(element) => {
-        itemRefs.current.container = element;
-      }}
-      style={{ display: "flex", gap: ARRAY_ITEM_GAP }}
-    >
+    <div style={{ display: "flex", gap: ARRAY_ITEM_GAP }}>
       {items.map((item, idx) => {
         const isFirstItem = idx == 0;
         const isLastItem = idx === items.length - 1;
@@ -58,22 +55,22 @@ export default function Array() {
         return (
           <ArrayItem
             key={item.id}
-            ref={(element) => {
-              itemRefs.current[item.id] = element;
-            }}
             {...item}
             index={idx}
-            isPushing={isPushing}
-            isPopping={isPopping}
+            isArrayPushing={isPushing}
+            isArrayPopping={isPopping}
             isBeingPopped={isPopping && isLastItem}
-            isShifting={isShifting}
+            isArrayShifting={isShifting}
             isBeingShifted={isShifting && isFirstItem}
-            isUnshifting={isUnshifting}
+            isArrayUnshifting={isUnshifting}
             onPush={onPush}
             onPop={onPop}
             onShift={onShift}
             onUnshift={onUnshift}
-            onSwap={handleSwapAnimationEnd}
+            onSwapPreEnd={handleSwapAnimationPreEnd}
+            onSwapPostEnd={handleSwapAnimationPostEnd}
+            onComparePreEnd={handleCompareAnimationPreEnd}
+            onComparePostEnd={handleCompareAnimationPostEnd}
           />
         );
       })}

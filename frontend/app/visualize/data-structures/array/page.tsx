@@ -12,6 +12,7 @@ export default function ArrayComponent() {
     popWithAnimation,
     shiftWithAnimation,
     unshiftWithAnimation,
+    bubbleSort,
   } = useArray();
 
   return (
@@ -38,6 +39,9 @@ export default function ArrayComponent() {
         </Button>
         <Button onClick={() => unshiftWithAnimation(1)} disabled={isAnimating}>
           Unshift
+        </Button>
+        <Button onClick={() => bubbleSort()} disabled={isAnimating}>
+          Bubble sort
         </Button>
       </div>
     </div>
