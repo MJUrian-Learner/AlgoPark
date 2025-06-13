@@ -457,6 +457,19 @@ export default function ArrayContext({
   const bubbleSort = useCallback(async () => {
     if (isBubbleSorting) return;
 
+    await new Promise((resolve) => {
+      setItems((items) => {
+        const newItems = _.cloneDeep(items);
+
+        for (const item of newItems) {
+          item.isSorted = false;
+        }
+
+        resolve(undefined);
+        return newItems;
+      });
+    });
+
     setIsBubbleSorting(true);
 
     const currentItems = _.cloneDeep(items);
@@ -470,17 +483,23 @@ export default function ArrayContext({
         continue;
       }
 
-      await compare(step.firstIndex, step.secondIndex, step.willSwap);
+      if (step.action === "compare") {
+        await compare(step.firstIndex, step.secondIndex, step.willSwap);
+        continue;
+      }
+
+      await new Promise((resolve) => {
+        setItems((items) => {
+          const newItems = _.cloneDeep(items);
+          newItems[step.index].isSorted = true;
+          resolve(undefined);
+          return newItems;
+        });
+      });
     }
 
     setIsBubbleSorting(false);
   }, [items, isBubbleSorting, swapWithAnimation, compare]);
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     compare(0, 1, false);
-  //   }, 1000);
-  // }, [compare]);
 
   return (
     <Context

@@ -5,7 +5,8 @@ export type BubbleStep =
       secondIndex: number;
       willSwap: boolean;
     }
-  | { action: "swap"; firstIndex: number; secondIndex: number };
+  | { action: "swap"; firstIndex: number; secondIndex: number }
+  | { action: "markFinal"; index: number };
 
 export default function bubble(items: { value: number }[]) {
   const steps: BubbleStep[] = [];
@@ -36,6 +37,11 @@ export default function bubble(items: { value: number }[]) {
         items[secondIndex] = firstItem;
       }
     }
+
+    steps.push({
+      action: "markFinal",
+      index: items.length - i - 1,
+    });
   }
 
   return steps;
